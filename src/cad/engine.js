@@ -143,7 +143,7 @@ export class CadEngine {
     this.orbit.update();
 
     this.transform = new TransformControls(this.camera, this.canvas);
-    this.transform.setSize(0.92);
+    this.transform.setSize(0.8);
     this.transform.setSpace('world');
     const helper = typeof this.transform.getHelper === 'function' ? this.transform.getHelper() : this.transform;
     this.transformHelper = helper;
