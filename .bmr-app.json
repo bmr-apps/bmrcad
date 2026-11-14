@@ -1,0 +1,12 @@
+{
+  "slug": "bmrcad",
+  "name": "별무리 캐드",
+  "schema": "bmrcad",
+  "db_role": "bmrcad_dev",
+  "bucket": "bmrcad",
+  "function": "bmrcad-fn",
+  "secret_prefix": "BMRCAD_",
+  "supabase_ref": "psupfmarnyxontorftio",
+  "url": "https://apps.bmrschool.net/bmrcad/",
+  "template": "bmr-app-templates v2"
+}
