@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { geometryFor, makeMaterial, SHAPE_BY_KIND, SHAPE_PALETTE, SAMPLE_MODELS } from './geometry.js';
 
 const r3 = (n) => Math.round(n * 1000) / 1000;
@@ -47,12 +48,19 @@ export class CadEngine {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#eef2f6');
 
+    // 금속·반투명 재질이 검게 죽지 않도록 작은 실내 환경 반사를 비춥니다 (외부 파일 없음)
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this._envRT = pmrem.fromScene(new RoomEnvironment(), 0.06);
+    this.scene.environment = this._envRT.texture;
+    this.scene.environmentIntensity = 0.45;
+    pmrem.dispose();
+
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.3, 9000);
     this.camera.position.set(190, 165, 230);
 
     // 조명 — 부드러운 그림자 + 위아래 색이 다른 하늘빛
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xb4c4cf, 1.55));
-    const key = new THREE.DirectionalLight(0xffffff, 2.15);
+    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xb4c4cf, 1.25));
+    const key = new THREE.DirectionalLight(0xffffff, 1.95);
     key.position.set(150, 260, 170);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
@@ -654,6 +662,7 @@ export class CadEngine {
     this.transform.detach();
     this.transform.dispose?.();
     this.orbit.dispose();
+    this._envRT?.dispose();
     this.renderer.dispose();
   }
 }

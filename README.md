@@ -1,7 +1,8 @@
 # 별무리 캐드 · 개발 안내
 
-BMR APPS 에서 준비해 드린 **빈 개발 환경**입니다. 화면, 데이터 구조, 로그인 규칙은 모두 개발자가 직접 정해서 만드시면 됩니다.
-지금 앱 주소에는 **'준비 중인 페이지입니다'** 라는 간단한 안내만 보입니다. `index.html` 을 내 앱 화면으로 바꿔 올리면 바로 바뀝니다.
+**별무리 캐드** — 브라우저에서 바로 쓰는 3D 모델링 편집기(티커캐드류)입니다.
+도형 7종과 예제 모델 3종을 작업판(200 × 200 mm)에 놓고 이동·회전·크기를 다듬어, 3D 프린터용 **STL**, 색·재질이 담긴 **GLB**, 백업용 **JSON** 으로 내보냅니다.
+만든 모델은 로그인하면 계정(`bmrcad.projects`)에, 미리보기 모드에서는 이 브라우저에 저장됩니다.
 파비콘은 허브 카드 꾸미기에서 정한 아이콘이 자동으로 쓰입니다. 직접 바꾸고 싶으면 `index.html` 의 `link rel="icon"` 태그를 바꾸면 됩니다.
 
 > 개발 정보(접속 정보·이름·예제 코드)는 이 README 와 **BMR APPS 허브 → 대시보드 → 내 서비스 → 개발 정보**(담당자·관리자만 보임)에서 볼 수 있습니다.
@@ -21,6 +22,31 @@ BMR APPS 에서 준비해 드린 **빈 개발 환경**입니다. 화면, 데이�
 | 서버 함수 | `bmrcad-fn` → `https://psupfmarnyxontorftio.supabase.co/functions/v1/bmrcad-fn/hello` |
 | 함수 비밀값 이름 | `BMRCAD_` 로 시작 (예: `BMRCAD_EXAMPLE_KEY`) |
 | 앱 이름·설명 | 허브에서 관리자가 고치면 새로고침만으로 반영 (`src/app-info.js` 의 `loadAppInfo()`) |
+
+## 앱 구조 (별무리 캐드)
+
+| 파일 | 하는 일 |
+|---|---|
+| `index.html` | 화면 뼈대 — 머리줄, 도형·예제·내 모델 패널, 3D 화면, 속성·오브젝트 패널, 로그인 화면, 도움말 |
+| `src/main.js` | 화면과 엔진 연결 — 팔레트·예제·내보내기·저장·로그인·단축키·모바일 탭 |
+| `src/cad/engine.js` | 3D 엔진 — 장면 · 조명 · 그림자, 카메라 시점 5종, 선택(raycaster), TransformControls 손잡이, 격자 스냅, 되돌리기, STL/GLB 내보내기 |
+| `src/cad/geometry.js` | 도형 7종의 기본 도형과 재질 4종, 예제 모델(로켓·연필꽂이·별무리관) 조각 정의 |
+| `src/cad/ui.js` | 선택 도형 속성(이름·위치·회전·크기·색·재질)과 오브젝트 목록 |
+| `src/cad/api.js` | 모델 저장소 — 로그인했으면 서버 함수, 아니면 `localStorage`(`bmrcad:projects`) |
+| `supabase/migrations/202611150001_bmrcad_init.sql` | `bmrcad.projects` 표 |
+| `supabase/functions/bmrcad-fn/index.ts` | `GET /health`, `GET /projects`, `POST /projects`, `DELETE /projects/:id` (표가 없으면 첫 요청 때 만듭니다) |
+
+### 모델 저장 API (bmrcad-fn)
+
+```text
+GET    /health            DB·표 준비 확인 → { ok, db, schema }
+GET    /projects          내 모델 + 공개 모델 (손님은 공개 모델만)
+POST   /projects          (로그인) { id?, title, data, is_public } → { project }
+DELETE /projects/:id      (로그인) 내 모델만
+```
+
+`data` 는 앱의 `engine.serialize()` 결과(`{ app, version, objects: [...] }`)를 그대로 넣습니다.
+브라우저 역할(anon·authenticated)은 이 표에 권한이 없어서 직접 읽거나 쓸 수 없고, 서버 함수만 다룹니다.
 
 ## 1. 시작하기
 
@@ -392,9 +418,10 @@ push 할 때마다 GitHub Actions 의 **'공용 주소 점검'** (`.github/workf
 ## 폴더
 
 ```
-index.html                  ← 지금은 '준비 중' 안내 페이지. 내 앱 화면으로 바꾸세요
+index.html                  ← 앱 화면 뼈대
 src/supabase.js             ← Supabase 연결 (스키마 bmrcad)
-src/main.js, src/style.css  ← 준비 중 페이지용 (지워도 됨)
+src/main.js, src/style.css  ← 화면 연결 코드와 BMR APPS 테마
+src/cad/                    ← 3D 엔진(engine.js) · 도형(geometry.js) · 속성 패널(ui.js) · 모델 저장(api.js)
 src/app-info.js             ← 허브에 적힌 앱 이름·설명 읽기
 src/auth.js                 ← 로그인 도우미 (구글 로그인·로그아웃·지금 사용자)
 src/store.js                ← 브라우저 저장소 도우미 (이름 앞에 'bmrcad:' 자동)

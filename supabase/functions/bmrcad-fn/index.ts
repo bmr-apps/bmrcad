@@ -68,6 +68,13 @@ function ensureSchema(sql: postgres.Sql): Promise<boolean> {
         updated_at timestamptz not null default now()
       )`;
       await sql`create index if not exists projects_user_idx on bmrcad.projects (user_id, updated_at desc)`;
+      // 브라우저 역할(anon·authenticated)은 표 권한 자체가 없지만, 한 겹 더 막아 둡니다.
+      // (표 주인인 함수 역할은 RLS 를 지나가므로 아래 조회·저장은 그대로 동작합니다)
+      try {
+        await sql`alter table bmrcad.projects enable row level security`;
+      } catch (e) {
+        console.warn(FN, 'RLS 설정 건너뜀', (e as { code?: string })?.code ?? '', (e as Error)?.message ?? e);
+      }
       return true;
     } catch (e) {
       console.error(FN, 'ensureSchema', (e as { code?: string })?.code ?? '', (e as Error)?.message ?? e);

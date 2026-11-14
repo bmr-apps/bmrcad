@@ -122,9 +122,9 @@ export const SAMPLE_MODELS = [
       part('cone', '로켓 노즈', [26, 34, 26], [0, 64 + 17, 0], [0, 0, 0], '#ff614a', 'plastic'),
       part('torus', '창틀', [18, 18, 18], [0, 46, 13], [90, 0, 0], '#0abbee', 'metal'),
       part('sphere', '창', [11, 11, 11], [0, 46, 14], [0, 0, 0], '#e5f7fc', 'glass'),
-      part('cone', '분사구', [20, 14, 20], [0, 1, 0], [180, 0, 0], '#7e65c1', 'metal'),
+      part('cone', '분사구', [22, 16, 22], [0, 7, 0], [180, 0, 0], '#7e65c1', 'metal'),
       ...finParts(),
-      part('cylinder', '받침대', [44, 4, 44], [0, 2, 0], [0, 0, 0], '#ffdc1a', 'matte'),
+      part('cylinder', '발사대', [52, 4, 52], [0, 2, 0], [0, 0, 0], '#ffdc1a', 'matte'),
     ],
   },
   {

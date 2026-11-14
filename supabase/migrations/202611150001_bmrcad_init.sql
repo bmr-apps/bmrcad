@@ -18,4 +18,9 @@ create index if not exists projects_public_idx on projects (updated_at desc) whe
 
 -- 브라우저(공개 키)로는 표에 직접 닿지 못하게 하고, 서버 함수(bmrcad_fn)로만 다룹니다.
 -- 함수는 표 주인 역할로 접속하므로 RLS 를 지나갑니다 → 누가 무엇을 보는지는 함수 코드가 정합니다.
-alter table projects enable row level security;
+do $$
+begin
+  alter table projects enable row level security;
+exception when insufficient_privilege then
+  raise notice 'RLS 는 표 주인만 바꿀 수 있어 건너뜁니다 (표 권한이 이미 브라우저 역할에 없으므로 그대로 안전합니다).';
+end $$;
