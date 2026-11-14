@@ -652,6 +652,8 @@ export class CadEngine {
   _afterObjectsChanged() {
     this._updateBoxHelper();
     this.onChange();
+    // 바닥 정렬처럼 값이 바뀌는 동작 뒤에 속성 패널 숫자도 함께 새로 고침
+    this.onTransform(this.selected);
   }
 
   dispose() {
@@ -684,6 +686,6 @@ function jitterPosition(index, height) {
   const ring = Math.floor((index - 1) / 6) + 1;
   const step = (index - 1) % 6;
   const angle = (step * Math.PI) / 3 + ring * 0.4;
-  const radius = 26 * ring;
+  const radius = 36 * ring;
   return [Math.cos(angle) * radius, Math.max(height, 1) / 2, Math.sin(angle) * radius];
 }
