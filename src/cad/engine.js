@@ -482,7 +482,8 @@ export class CadEngine {
     else box = this._contentBox();
     const center = box.getCenter(new THREE.Vector3());
     const radius = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 14);
-    const dist = radius / Math.sin((this.camera.fov * DEG) / 2) * 1.15 + radius * 0.55;
+    const pad = name === 'focus' ? 1.7 : 1.15;
+    const dist = radius / Math.sin((this.camera.fov * DEG) / 2) * pad + radius * 0.55;
     const dir = new THREE.Vector3(0.9, 0.74, 1.12).normalize();
     let up = new THREE.Vector3(0, 1, 0);
     if (name === 'top') { dir.set(0, 1, 0.0001); up = new THREE.Vector3(0, 0, -1); }
