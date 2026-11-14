@@ -3,31 +3,216 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>별무리 캐드 · 준비 중 · BMR APPS</title>
-<meta name="description" content="별무리 캐드 — 준비 중인 페이지입니다 (BMR APPS)">
+<title>별무리 캐드 · 3D 모델링</title>
+<meta name="description" content="별무리 캐드 — 브라우저에서 바로 만드는 3D 모델링. 도형을 놓고 크기·회전을 다듬어 3D 프린터용 STL로 내보내세요.">
 <meta name="theme-color" content="#0abbee">
-<meta name="robots" content="noindex">
 <link rel="icon" href="https://psupfmarnyxontorftio.supabase.co/functions/v1/hub-favicon?slug=bmrcad">
 </head>
 <body>
-<!-- 준비 중 안내 페이지입니다. 앱을 만들면 이 파일(index.html)을 내 앱 화면으로 바꾸세요.
-     개발에 필요한 정보는 BMR APPS 허브의 '내 서비스 정보 → 개발 정보'와 저장소 README.md 에 있습니다. -->
+
+<div class="boot" id="boot"><span>별무리 캐드</span></div>
+
 <header class="top">
-  <a class="mark" href="https://apps.bmrschool.net/" aria-label="BMR APPS 메인 화면"><span>BMR</span><span>APPS</span></a>
+  <a class="mark" href="./" aria-label="별무리 캐드 홈">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <polygon class="mk-top" points="24,5 43,15.5 24,26 5,15.5" fill="#ffdc1a" stroke="#000" stroke-width="2" stroke-linejoin="miter"/>
+      <polygon points="5,15.5 24,26 24,47 5,36.5" fill="#fff" stroke="#000" stroke-width="2" stroke-linejoin="miter"/>
+      <polygon points="43,15.5 24,26 24,47 43,36.5" fill="#0abbee" stroke="#000" stroke-width="2" stroke-linejoin="miter"/>
+      <path class="mk-star" d="M24 9.4l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5z" fill="#000"/>
+    </svg>
+  </a>
+  <div class="app-brand">
+    <b>별무리 캐드</b>
+    <small>3D 모델링 · BMR APPS</small>
+  </div>
+  <nav class="topnav" aria-label="계정">
+    <span class="save-state" id="save-state" title="모델 저장 위치">이 기기에 저장</span>
+    <span class="who" id="who" hidden></span>
+    <button type="button" class="ghost" id="btn-help" title="단축키와 사용법 (?)">?</button>
+    <button type="button" class="ghost" id="btn-account" hidden>로그인</button>
+    <button type="button" class="ghost" id="btn-signout" hidden>로그아웃</button>
+  </nav>
 </header>
-<main class="wrap">
-  <section class="hero">
-    <div class="copy">
-      <span class="eyebrow">준비 중</span>
-      <h1 data-app-name>별무리 캐드</h1>
-      <p class="desc" data-app-desc hidden></p>
-      <p class="notice"><b>준비 중인 페이지입니다.</b> 곧 이 주소에서 서비스를 열 예정이에요.</p>
-      <a class="btn" href="https://apps.bmrschool.net/">BMR APPS 서비스 둘러보기</a>
+
+<div class="preview-bar" id="preview-bar" hidden>
+  <b>미리보기 모드</b>
+  <span>로그인하지 않고 쓰고 있어요. 모델은 이 브라우저에만 저장되고, STL·GLB 내보내기는 그대로 됩니다.</span>
+  <button type="button" class="small" id="btn-preview-login">구글 로그인</button>
+</div>
+
+<main class="studio" id="studio">
+  <!-- ─── 왼쪽: 도형 · 예제 · 내 모델 ─── -->
+  <aside class="panel panel-left" id="panel-left" aria-label="도형과 파일">
+    <section class="pane">
+      <header class="pane-head"><h2>도형 추가</h2><span class="tag">클릭해서 놓기</span></header>
+      <div class="pane-body">
+        <div class="shape-grid" id="shape-grid"></div>
+      </div>
+    </section>
+
+    <section class="pane">
+      <header class="pane-head"><h2>예제 모델</h2><span class="tag">조각으로 만든 예시</span></header>
+      <div class="pane-body">
+        <div class="sample-list" id="sample-list"></div>
+      </div>
+    </section>
+
+    <section class="pane">
+      <header class="pane-head"><h2>내 모델</h2><span class="tag" id="store-tag">이 기기</span></header>
+      <div class="pane-body">
+        <div class="proj-save">
+          <input type="text" id="proj-title" maxlength="60" placeholder="모델 이름" aria-label="모델 이름">
+          <button type="button" id="btn-save">저장</button>
+        </div>
+        <ul class="proj-list" id="project-list"></ul>
+        <p class="hint" id="project-empty">저장한 모델이 없습니다.</p>
+      </div>
+    </section>
+
+    <section class="pane">
+      <header class="pane-head"><h2>파일</h2><span class="tag">내보내기 · 백업</span></header>
+      <div class="pane-body">
+        <div class="btn-stack">
+          <button type="button" id="btn-stl">STL 내보내기 <small>3D 프린터</small></button>
+          <button type="button" id="btn-glb">GLB 내보내기 <small>색·재질 포함</small></button>
+          <button type="button" class="ghost" id="btn-json-save">JSON으로 저장</button>
+          <button type="button" class="ghost" id="btn-json-load">JSON 불러오기</button>
+        </div>
+        <input type="file" id="json-file" accept=".json,application/json" hidden>
+        <button type="button" class="ghost danger block" id="btn-new">새로 시작 (모두 지우기)</button>
+      </div>
+    </section>
+  </aside>
+
+  <!-- ─── 가운데: 3D 화면 ─── -->
+  <section class="viewport-wrap" aria-label="3D 작업 화면">
+    <div class="vbar" role="toolbar" aria-label="3D 도구">
+      <div class="vgroup" role="group" aria-label="시점">
+        <button type="button" data-view="iso" class="on" title="등각 시점 (Home)">홈</button>
+        <button type="button" data-view="top" title="위에서 보기">위</button>
+        <button type="button" data-view="front" title="앞에서 보기">앞</button>
+        <button type="button" data-view="right" title="옆에서 보기">옆</button>
+        <button type="button" data-view="focus" title="선택한 도형 확대 (F)">확대</button>
+      </div>
+      <div class="vgroup" role="group" aria-label="변형 도구">
+        <button type="button" data-mode="translate" class="on" title="이동 (W)">이동</button>
+        <button type="button" data-mode="rotate" title="회전 (E)">회전</button>
+        <button type="button" data-mode="scale" title="크기 (R)">크기</button>
+      </div>
+      <div class="vgroup" role="group" aria-label="격자 스냅">
+        <span class="vlabel">격자</span>
+        <button type="button" data-snap="0" class="on" title="격자에 맞추지 않음">끔</button>
+        <button type="button" data-snap="1" title="1mm 단위">1mm</button>
+        <button type="button" data-snap="5" title="5mm 단위">5mm</button>
+      </div>
+      <div class="vgroup" role="group" aria-label="편집">
+        <button type="button" id="btn-undo" title="되돌리기 (Ctrl+Z)" aria-label="되돌리기">↶</button>
+        <button type="button" id="btn-redo" title="다시 실행 (Ctrl+Y)" aria-label="다시 실행">↷</button>
+        <button type="button" id="btn-grid" class="on" title="작업판 격자 보기" aria-label="격자 보기">격자 보기</button>
+        <button type="button" id="btn-delete" class="danger" title="선택 삭제 (Delete)" aria-label="선택 삭제">삭제</button>
+      </div>
     </div>
-    <div class="art" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i><i class="f"></i></div>
+
+    <div class="canvas-host" id="canvas-host">
+      <canvas id="cad-canvas"></canvas>
+      <div class="view-badge" id="view-badge">홈 · 등각</div>
+      <div class="empty-hint" id="empty-hint">
+        <b>빈 작업판이에요</b>
+        <span>왼쪽 <em>도형 추가</em>에서 하나 놓아 보세요. 끌어서 옮기고, 모서리를 잡아 키울 수 있어요.</span>
+      </div>
+      <div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
+    </div>
+
+    <div class="statusbar">
+      <span id="st-count">도형 0개</span>
+      <span id="st-sel">선택 없음</span>
+      <span class="grow"></span>
+      <span id="st-tri">삼각형 0</span>
+      <span class="st-plane">작업판 200 × 200 mm</span>
+    </div>
   </section>
+
+  <!-- ─── 오른쪽: 선택 도형 · 오브젝트 목록 ─── -->
+  <aside class="panel panel-right" id="panel-right" aria-label="속성과 오브젝트">
+    <section class="pane" id="pane-inspect">
+      <header class="pane-head"><h2>선택 도형</h2><span class="tag" id="sel-tag">없음</span></header>
+      <div class="pane-body" id="inspector">
+        <p class="empty">도형을 클릭하면 여기에서 이름·위치·크기·색을 바꿀 수 있어요.</p>
+      </div>
+    </section>
+
+    <section class="pane" id="pane-objects">
+      <header class="pane-head"><h2>오브젝트</h2><span class="tag" id="obj-count">0개</span></header>
+      <div class="pane-body">
+        <ul class="obj-list" id="object-list"></ul>
+        <p class="hint" id="object-empty">아직 도형이 없습니다.</p>
+      </div>
+    </section>
+  </aside>
 </main>
-<footer class="foot">별무리 개발자들이 함께 만들고 나누는 공간 · <a href="https://apps.bmrschool.net/">BMR APPS</a></footer>
+
+<nav class="mobile-tabs" id="mobile-tabs" aria-label="패널 열기">
+  <button type="button" data-tab="left" class="on">도형</button>
+  <button type="button" data-tab="inspect">속성</button>
+  <button type="button" data-tab="objects">목록</button>
+</nav>
+
+<!-- ─── 로그인 / 미리보기 ─── -->
+<div class="gate" id="gate" hidden>
+  <div class="gate-card" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="gate-art" aria-hidden="true">
+      <svg viewBox="0 0 120 120">
+        <polygon points="60,10 110,38 60,66 10,38" fill="#ffdc1a" stroke="#000" stroke-width="3"/>
+        <polygon points="10,38 60,66 60,112 10,84" fill="#fff" stroke="#000" stroke-width="3"/>
+        <polygon points="110,38 60,66 60,112 110,84" fill="#0abbee" stroke="#000" stroke-width="3"/>
+        <path d="M60 22l4 9 9 4-9 4-4 9-4-9-9-4 9-4z" fill="#000"/>
+        <path d="M24 92l10-5v10l-10 5z" fill="#ff614a" stroke="#000" stroke-width="2"/>
+        <path d="M96 90l-10-5v10l10 5z" fill="#02c245" stroke="#000" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="gate-copy">
+      <span class="eyebrow">BMR APPS · 별무리 캐드</span>
+      <h1 id="gate-title">도형을 놓고, 3D 프린터로</h1>
+      <p>큐브·구·원기둥을 조합해 모델을 만들고, 크기와 색을 다듬어 <b>STL</b>로 내보내세요. 설치 없이 브라우저에서 바로 됩니다.</p>
+      <div class="gate-actions">
+        <button type="button" class="btn-primary btn-lg" id="btn-google">구글로 로그인</button>
+        <button type="button" class="btn-secondary btn-lg" id="btn-preview">미리보기 모드로 시작</button>
+      </div>
+      <p class="gate-note">로그인하면 만든 모델이 계정에 저장되고 다른 기기에서도 열 수 있어요. 미리보기 모드는 이 브라우저에만 저장됩니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 도움말 ─── -->
+<div class="sheet" id="help-sheet" hidden>
+  <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <header><h2 id="help-title">이렇게 쓰면 됩니다</h2><button type="button" class="ghost small" id="btn-help-close" aria-label="닫기">닫기</button></header>
+    <div class="sheet-body">
+      <h3>만들기</h3>
+      <ul>
+        <li>왼쪽 <b>도형 추가</b>를 누르면 작업판 가운데에 도형이 놓입니다.</li>
+        <li>도형을 <b>클릭</b>해 고르고, 화살표(이동)·원(회전)·네모(크기) 손잡이를 끌어 다듬습니다.</li>
+        <li>빈 곳을 클릭하면 선택이 풀립니다. <b>격자 1mm·5mm</b>를 켜면 딱 떨어지는 위치로 움직입니다.</li>
+        <li>오른쪽 <b>선택 도형</b>에서 숫자를 직접 적어도 됩니다. <b>바닥 정렬</b>을 누르면 바닥에 딱 붙습니다.</li>
+      </ul>
+      <h3>단축키</h3>
+      <ul class="keys">
+        <li><kbd>W</kbd> 이동 · <kbd>E</kbd> 회전 · <kbd>R</kbd> 크기</li>
+        <li><kbd>Ctrl</kbd>+<kbd>Z</kbd> 되돌리기 · <kbd>Ctrl</kbd>+<kbd>Y</kbd> 다시 실행</li>
+        <li><kbd>Delete</kbd> 선택한 도형 지우기 · <kbd>Ctrl</kbd>+<kbd>D</kbd> 복제</li>
+        <li><kbd>F</kbd> 선택 확대 · <kbd>Home</kbd> 홈 시점</li>
+        <li>마우스: 왼쪽 끌기 회전 · 오른쪽 끌기 이동 · 휠 확대/축소</li>
+      </ul>
+      <h3>내보내기</h3>
+      <ul>
+        <li><b>STL</b>은 3D 프린터 슬라이서에 바로 넣는 파일입니다. 단위는 mm이고, 색은 들어가지 않습니다.</li>
+        <li><b>GLB</b>는 색·재질까지 담긴 3D 파일입니다. 다른 프로그램에서 열거나 화면에 올릴 때 씁니다.</li>
+        <li><b>JSON</b>은 이 앱에서 다시 열어 고치기 위한 백업 파일입니다.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>
